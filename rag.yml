@@ -1,0 +1,24 @@
+version: "3.9"
+services:
+  rag:
+    image: southamerica-east1-docker.pkg.dev/spark-eyes/spark-eyes/rag:latest
+    build:
+      dockerfile: rag.Dockerfile
+    container_name: rag
+    privileged: true
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "5"
+    volumes:
+      - "/etc/timezone:/etc/timezone:ro"
+      - "/etc/localtime:/etc/localtime:ro"
+    environment:
+      - WEBSITES='https://vidasaudavel.einstein.br/cuidados-com-a-pele/, https://pt.wikipedia.org/wiki/Pele'
+      - TITLE='Rotinas com a Pele'
+      - DESCRIPTION='Insira as perguntas'
+      - PLACEHOLDER='Nova pergunta'
+      - DOCUMENTS='./documents/EngHelper'
+    restart: always
+    network_mode: host
