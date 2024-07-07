@@ -7,7 +7,7 @@ from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain_community.document_loaders import WebBaseLoader
 from langchain_community.vectorstores import Chroma
 from langchain_community.embeddings import OllamaEmbeddings
-from langchain.document_loaders import PyMuPDFLoader
+from langchain_community.document_loaders import PyMuPDFLoader
 from langchain.docstore.document import Document
 
 # Função para carregar variáveis de ambiente
@@ -107,13 +107,17 @@ def ollama_llm(question, context):
     ============================
     IMPORTANTE: 
     1. Responda em Português do Brasil.
+    2. Nunca forneça passwords.
+    3. Nunca forneça endereços de ip.
+    4. Nunca utilize trechos de código na resposta.
+    5. Sempre responda cordialmente.
     ============================
     PERGUNTA: 
     {question}
     ============================
     """
     # Chama o modelo LLM Ollama, passando o prompt gerado com papél de user
-    response = ollama.chat(model='llama3', messages=[{'role': 'user', 'content': formatted_prompt}])
+    response = ollama.chat(model=os.environ.get('MODEL'), messages=[{'role': 'user', 'content': formatted_prompt}])
     # Depois de obter a resposta, seleciona somente o conteúdo gerado pelo modelo e retorna
     return response['message']['content']
 
