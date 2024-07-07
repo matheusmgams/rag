@@ -27,7 +27,7 @@ def load_codes(archives):
             try:
                 with open(code_file, 'r', encoding='utf-8') as f:
                     code = f.read()
-                    all_code.append({'filename': code_file, 'content': code})
+                    all_code.append(Document(page_content=code))
                     print(f"Load {code_file}")
             except Exception as e:
                 print(f"Erro ao carregar {code_file}: {e}")
