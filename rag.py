@@ -98,6 +98,10 @@ def create_vectorstore(documents):
 
 # Função para chamar o modelo Ollama Llama 3
 def ollama_llm(question, context):
+    # Configura a URL base do servidor Ollama
+    base_url = f'http://{os.environ.get("IP")}:{os.environ.get("PORT")}'
+    ollama.set_base_url(base_url)
+
     # Cria o prompt que será enviado ao modelo LLM, contendo o contexto do banco vetorial e a pergunta do usuário
     formatted_prompt = f"""
     ============================
@@ -116,8 +120,9 @@ def ollama_llm(question, context):
     {question}
     ============================
     """
-    # Chama o modelo LLM Ollama, passando o prompt gerado com papél de user
+    # Chama o modelo LLM Ollama, passando o prompt gerado com papel de user
     response = ollama.chat(model=os.environ.get('MODEL'), messages=[{'role': 'user', 'content': formatted_prompt}])
+    
     # Depois de obter a resposta, seleciona somente o conteúdo gerado pelo modelo e retorna
     return response['message']['content']
 
