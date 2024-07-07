@@ -8,105 +8,109 @@ from langchain_community.document_loaders import WebBaseLoader
 from langchain_community.vectorstores import Chroma
 from langchain_community.embeddings import OllamaEmbeddings
 from langchain.document_loaders import PyMuPDFLoader
-from langchain.text_splitter import RecursiveCharacterTextSplitter
-from langchain.vectorstores import Chroma
 from langchain.docstore.document import Document
 
-# Load Environment Variables
-load_dotenv()
+# Função para carregar variáveis de ambiente
+def load_env_variables():
+    load_dotenv()
+    pdf_directory = os.environ.get('DOCUMENTS')
+    websites = os.environ.get('WEBSITES').split(',')
+    return pdf_directory, websites
 
-# Inicializa uma lista para armazenar todos os documentos
-all_docs = []
+# Função para carregar documentos PDF
+def load_pdfs(pdf_directory):
+    pdf_files = [os.path.join(pdf_directory, file) for file in os.listdir(pdf_directory) if file.endswith('.pdf')]
+    all_docs = []
+    for pdf_file in pdf_files:
+        try:
+            loader = PyMuPDFLoader(pdf_file)
+            docs = loader.load()
+            all_docs.extend(docs)
+        except Exception as e:
+            print(f"Erro ao carregar {pdf_file}: {e}")
+    return all_docs
 
-# Defina o caminho da pasta onde estão os arquivos PDF
-pdf_directory = str(os.environ.get('DOCUMENTS'))
+# Função para carregar documentos PPTX
+def load_pptx(pdf_directory):
+    pptx_files = [os.path.join(pdf_directory, file) for file in os.listdir(pdf_directory) if file.endswith('.pptx')]
+    all_docs = []
+    for pptx_file in pptx_files:
+        try:
+            doc_content = ""
+            prs = Presentation(pptx_file)
+            for slide in prs.slides:
+                for shape in slide.shapes:
+                    if hasattr(shape, "text"):
+                        doc_content += shape.text + "\n"
+            all_docs.append(Document(page_content=doc_content))
+        except Exception as e:
+            print(f"Erro ao carregar {pptx_file}: {e}")
+    return all_docs
 
-# Lista todos os arquivos PDF na pasta
-pdf_files = [os.path.join(pdf_directory, file) for file in os.listdir(pdf_directory) if file.endswith('.pdf')]
+# Função para carregar conteúdo de websites
+def load_websites(websites):
+    all_docs = []
+    for website in websites:
+        try:
+            loader = WebBaseLoader(website)
+            docs = loader.load()
+            all_docs.extend(docs)
+        except Exception as e:
+            print(f"Erro ao carregar {website}: {e}")
+    return all_docs
 
-# Itera sobre a lista de arquivos PDF, carregando cada um e adicionando-o à lista de documentos
-for pdf_file in pdf_files:
-    loader = PyMuPDFLoader(pdf_file)
-    docs = loader.load()
-    all_docs.extend(docs)
+# Função principal para carregar todos os documentos
+def load_all_documents(pdf_directory, websites):
+    all_docs = []
+    all_docs.extend(load_pdfs(pdf_directory))
+    all_docs.extend(load_pptx(pdf_directory))
+    all_docs.extend(load_websites(websites))
+    return all_docs
 
-# Lista todos os arquivos PPTX na pasta
-pptx_files = [os.path.join(pdf_directory, file) for file in os.listdir(pdf_directory) if file.endswith('.pptx')]
+# Função para criar o vetor de embeddings
+def create_vectorstore(documents):
+    text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=200)
+    splits = text_splitter.split_documents(documents)
+    embeddings = OllamaEmbeddings(model="nomic-embed-text")
+    vectorstore = Chroma.from_documents(documents=splits, embedding=embeddings)
+    return vectorstore.as_retriever()
 
-# Itera sobre a lista de arquivos PPTX, carregando cada um e adicionando-o à lista de documentos
-for pptx_file in pptx_files:
-    doc_content = "" 
-    prs = Presentation(pptx_file)       
-    for slide in prs.slides:
-        for shape in slide.shapes:
-            if hasattr(shape, "text"):
-                doc_content += shape.text + "\n"
-    
-    # Cria um objeto Document e adiciona à lista de documentos
-    all_docs.append(Document(page_content=doc_content))
-
-# Definimos que vamos carregar o conteúdo das páginas de referência
-websites = str(os.environ.get('WEBSITES')).split(',')
-
-# Itera sobre a lista de websites, carregando cada um e adicionando-o à lista de documentos
-for website in websites:
-    loader = WebBaseLoader(website)
-    docs = loader.load()
-    all_docs.extend(docs)
-
-# Cria o divisor de texto
-text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=200)
-
-# Divide o grande documento em chunks
-splits = text_splitter.split_documents(all_docs)
-
-# Cria o modelo de embeddings (substitua pelo embedding que você deseja usar)
-embeddings = OllamaEmbeddings(model="nomic-embed-text")
-
-# Cria o vectorstore do Chroma, armazenando todos os chunks de textos já como embedding
-vectorstore = Chroma.from_documents(documents=splits, embedding=embeddings)
-
-# Aponta o vectorstore definido anteriormente como recuperador de informações, definindo nosso RAG
-retriever = vectorstore.as_retriever()
-
-# Define a função para chamar o modelo Ollama Llama 3 com a pergunta do usuário e o contexto do banco vetorial
+# Função para chamar o modelo Ollama Llama 3
 def ollama_llm(question, context):
-    # Cria o prompt que será enviado ao modelo LLM, contendo o contexto do banco vetorial e a pergunta do usuário
     formatted_prompt = f"""
         Contexto: {context}
-        Importante: Sempre Responda em Português do Brasil e Nunca saia dos assuntos do Contexto.
+        Importante: Sempre Responda em Português do Brasil, Segundo as definições do SCP-DEV-1000 e dê exemplos conforme as orientações do SCP-DEV-1000.
         Pergunta: {question}
     """
-    # Chama o modelo LLM Ollama, passando o prompt gerado com papél de user
     response = ollama.chat(model='llama3', messages=[{'role': 'user', 'content': formatted_prompt}])
-    # Depois de obter a resposta, seleciona somente o conteúdo gerado pelo modelo e retorna
     return response['message']['content']
 
-# Define a função para realizar a corrente RAG, recebendo a pergunta do usuário
-def rag_chain(question):
-    # Passa a pergunta para o nosso retriever, que por baixo dos panos converte para embedding e
-    # traz todas as partes do texto, chunks, mais similares com a questão do usuário
+# Função para realizar a corrente RAG
+def rag_chain(question, retriever):
     retrieved_docs = retriever.invoke(question)
-    # Formata os chunks retornados e o envia para a chamada do modelo LLM
     formatted_context = "\n\n".join(doc.page_content for doc in retrieved_docs)
-    # Chama o modelo Ollama com a pergunta do usuário e o contexto formatado
     print("retrieved_docs: " + formatted_context)
     return ollama_llm(question, formatted_context)
 
-# Método para receber a pergunta do usuário e iniciar a corrente RAG de sincronização dos dados
-def answer_user_request(question):
+# Função para responder à pergunta do usuário
+def answer_user_request(question, retriever):
     print("Nova pergunta: " + question)
-    # Aciona a corrente RAG
-    return rag_chain(question)
+    return rag_chain(question, retriever)
 
-# Cria uma interface no Gradio, passando a função que vai lidar com a troca de mensagens
-iface = gr.Interface(
-    fn=answer_user_request,
-    inputs=gr.Textbox(lines=2, placeholder=os.getenv('PLACEHOLDER')),
-    outputs="text",
-    title=os.getenv('TITLE'),
-    description=os.getenv('DESCRIPTION'),
-)
+# Função principal
+def main():
+    pdf_directory, websites = load_env_variables()
+    all_docs = load_all_documents(pdf_directory, websites)
+    retriever = create_vectorstore(all_docs)
+    
+    iface = gr.Interface(
+        fn=lambda question: answer_user_request(question, retriever),
+        inputs=gr.Textbox(lines=2, placeholder=os.getenv('PLACEHOLDER')),
+        outputs="text",
+        title=os.getenv('TITLE'),
+        description=os.getenv('DESCRIPTION'),
+    )
+    iface.launch(debug=True)
 
-# Inicia o app Gradio
-iface.launch(debug=True)
+if __name__ == "__main__":
+    main()
