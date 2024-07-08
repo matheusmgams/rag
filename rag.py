@@ -84,10 +84,10 @@ def load_websites(websites):
 # Função principal para carregar todos os documentos
 def load_all_documents(archives, websites, codes):
     all_docs = []
-    all_docs.extend(load_codes(codes))
-    all_docs.extend(load_pdfs(archives))
-    all_docs.extend(load_pptx(archives))
-    all_docs.extend(load_websites(websites))
+    if codes is not None: all_docs.extend(load_codes(codes))
+    if archives is not None: all_docs.extend(load_pdfs(archives))
+    if archives is not None: all_docs.extend(load_pptx(archives))
+    if websites is not None: all_docs.extend(load_websites(websites))
     return all_docs
 
 # Função para criar o vetor de embeddings
