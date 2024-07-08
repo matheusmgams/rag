@@ -16,7 +16,8 @@ def load_env_variables():
     codes = os.environ.get('CODES')
     archives = os.environ.get('DOCUMENTS')
     websites = os.environ.get('WEBSITES').split(',')
-    return archives, websites, codes
+    model = os.environ.get('MODEL')
+    return archives, websites, codes, model
 
 # Função para carregar arquivos de código como texto
 def load_codes(archives):
@@ -27,7 +28,7 @@ def load_codes(archives):
             try:
                 with open(code_file, 'r', encoding='utf-8') as f:
                     code = f.read()
-                    all_code.append(Document(page_content=code))
+                    all_code.append(Document(page_content=code, metadata={"title": code_file}))
                     print(f"Load {code_file}")
             except Exception as e:
                 print(f"Erro ao carregar {code_file}: {e}")
@@ -41,6 +42,8 @@ def load_pdfs(archives):
         try:
             loader = PyMuPDFLoader(pdf_file)
             docs = loader.load()
+            for doc in docs:
+                doc.metadata["title"] = pdf_file
             all_docs.extend(docs)
             print(f"Load {pdf_file}")
         except Exception as e:
@@ -59,7 +62,7 @@ def load_pptx(archives):
                 for shape in slide.shapes:
                     if hasattr(shape, "text"):
                         doc_content += shape.text + "\n"
-            all_docs.append(Document(page_content=doc_content))
+            all_docs.append(Document(page_content=doc_content, metadata={"title": pptx_file}))
             print(f"Load {pptx_file}")
         except Exception as e:
             print(f"Erro ao carregar {pptx_file}: {e}")
@@ -89,19 +92,18 @@ def load_all_documents(archives, websites, codes):
 
 # Função para criar o vetor de embeddings
 def create_vectorstore(documents):
-    text_splitter = RecursiveCharacterTextSplitter( chunk_size=int(os.environ.get('CHUNK_SIZE')), 
-                                                    chunk_overlap=int(os.environ.get('CHUNK_OVERLAP')))
-    splits = text_splitter.split_documents(documents)
+    text_splitter = RecursiveCharacterTextSplitter(chunk_size=int(os.environ.get('CHUNK_SIZE')), 
+                                                   chunk_overlap=int(os.environ.get('CHUNK_OVERLAP')))
+    splits = []
+    for doc in documents:
+        for chunk in text_splitter.split_text(doc.page_content):
+            splits.append(Document(page_content=chunk, metadata=doc.metadata))
     embeddings = OllamaEmbeddings(model="nomic-embed-text")
     vectorstore = Chroma.from_documents(documents=splits, embedding=embeddings)
     return vectorstore.as_retriever()
 
 # Função para chamar o modelo Ollama Llama 3
-def ollama_llm(question, context):
-    # Configura a URL base do servidor Ollama
-    base_url = f'http://{os.environ.get("IP")}:{os.environ.get("PORT")}'
-    ollama.set_base_url(base_url)
-
+def ollama_llm(question, context, model):
     # Cria o prompt que será enviado ao modelo LLM, contendo o contexto do banco vetorial e a pergunta do usuário
     formatted_prompt = f"""
     ============================
@@ -121,31 +123,31 @@ def ollama_llm(question, context):
     ============================
     """
     # Chama o modelo LLM Ollama, passando o prompt gerado com papel de user
-    response = ollama.chat(model=os.environ.get('MODEL'), messages=[{'role': 'user', 'content': formatted_prompt}])
+    response = ollama.chat(model=model, messages=[{'role': 'user', 'content': formatted_prompt}])
     
     # Depois de obter a resposta, seleciona somente o conteúdo gerado pelo modelo e retorna
     return response['message']['content']
 
 # Função para realizar a corrente RAG
-def rag_chain(question, retriever):
+def rag_chain(question, retriever, model):
     retrieved_docs = retriever.invoke(question)
     formatted_context = "\n\n".join(doc.page_content for doc in retrieved_docs)
     print("retrieved_docs: " + formatted_context)
-    return ollama_llm(question, formatted_context)
+    return ollama_llm(question, formatted_context, model)
 
 # Função para responder à pergunta do usuário
-def answer_user_request(question, retriever):
+def answer_user_request(question, retriever, model):
     print("Nova pergunta: " + question)
-    return rag_chain(question, retriever)
+    return rag_chain(question, retriever, model)
 
 # Função principal
 def main():
-    archives, websites, codes = load_env_variables()
+    archives, websites, codes, model = load_env_variables()
     all_docs = load_all_documents(archives, websites, codes)
     retriever = create_vectorstore(all_docs)
     
     iface = gr.Interface(
-        fn=lambda question: answer_user_request(question, retriever),
+        fn=lambda question: answer_user_request(question, retriever, model),
         inputs=gr.Textbox(lines=2, placeholder=os.getenv('PLACEHOLDER')),
         outputs="text",
         title=os.getenv('TITLE'),
