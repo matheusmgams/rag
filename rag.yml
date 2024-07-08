@@ -1,7 +1,7 @@
 version: "3.9"
 services:
   rag:
-    image: southamerica-east1-docker.pkg.dev/spark-eyes/spark-eyes/rag:latest
+    image: southamerica-east1-docker.pkg.dev/strokmatic/strokmatic/rag:latest
     build:
       dockerfile: rag.Dockerfile
     container_name: rag
@@ -14,11 +14,16 @@ services:
     volumes:
       - "/etc/timezone:/etc/timezone:ro"
       - "/etc/localtime:/etc/localtime:ro"
+      - "./documents:/home/strokmatic/documents"
     environment:
-      - WEBSITES='https://vidasaudavel.einstein.br/cuidados-com-a-pele/, https://pt.wikipedia.org/wiki/Pele'
-      - TITLE='Rotinas com a Pele'
+      - CODES=''
+      - DOCUMENTS='./documents'
+      - WEBSITES='https://www.hikrobotics.com/en/machinevision/visionproduct?typeId=78&id=145'
+      - MODEL='llama3'
+      - CHUNK_SIZE=4000
+      - CHUNK_OVERLAP=2000
       - DESCRIPTION='Insira as perguntas'
       - PLACEHOLDER='Nova pergunta'
-      - DOCUMENTS='./documents/EngHelper'
+      - TITLE='Vision'
     restart: always
     network_mode: host
