@@ -42,6 +42,4 @@ COPY . .
 
 # Installing Ollama
 RUN curl -fsSL https://ollama.com/install.sh | sh
-RUN ollama serve &
-
-ENTRYPOINT [ "tail", "-f", "/dev/null" ]
+ENTRYPOINT [ "ollama", "serve" ]
