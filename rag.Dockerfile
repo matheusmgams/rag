@@ -66,5 +66,8 @@ ENV PATH="/venv/bin:$PATH"
 # Permitir execução do script
 RUN chmod +x ./run.sh
 
+# Expor a porta que a aplicação irá usar
+EXPOSE 7860
+
 # Comando de entrada para iniciar o Ollama e o script Python
 ENTRYPOINT ["./run.sh"]
