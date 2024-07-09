@@ -16,7 +16,7 @@ RUN apt update && apt upgrade -y && apt install -y \
     libffi-dev \
     bash \
     curl \
-    wget 
+    wget
 
 # Instalando dependências Python
 COPY rag.req rag.req
@@ -26,6 +26,19 @@ RUN python3 -m venv /venv && \
 
 # Etapa final
 FROM chromadb/chroma:latest
+
+# Instalar dependências necessárias
+RUN apt update && apt install -y \
+    gnupg \
+    curl
+
+# Configurando repositório da Nvidia
+RUN curl -fsSL https://nvidia.github.io/libnvidia-container/gpgkey | gpg --dearmor -o /usr/share/keyrings/nvidia-container-toolkit-keyring.gpg && \
+    curl -s -L https://nvidia.github.io/libnvidia-container/stable/deb/nvidia-container-toolkit.list | \
+    sed 's#deb https://#deb [signed-by=/usr/share/keyrings/nvidia-container-toolkit-keyring.gpg] https://#g' | \
+    tee /etc/apt/sources.list.d/nvidia-container-toolkit.list && \
+    apt update && \
+    apt install -y nvidia-container-toolkit
 
 # Copiar ambiente Python da etapa de construção
 COPY --from=builder /venv /venv
@@ -50,5 +63,8 @@ COPY . .
 # Configurar ambiente virtual Python
 ENV PATH="/venv/bin:$PATH"
 
+# Permitir execução do script
+RUN chmod +x ./run.sh
+
 # Comando de entrada para iniciar o Ollama e o script Python
-ENTRYPOINT ["ollama", "serve"]
+ENTRYPOINT ["./run.sh"]

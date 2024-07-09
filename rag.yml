@@ -18,12 +18,12 @@ services:
     environment:
       - CODES=
       - DOCUMENTS=./documents
-      - WEBSITES=https://www.hikrobotics.com/en/machinevision/visionproduct?typeId=78&id=145
+      - WEBSITES=https://www.hikrobotics.com/en/machinevision/visionproduct?typeId=78&id=145,https://www.baslerweb.com/en/cameras/#produkte
       - MODEL=llama3
       - CHUNK_SIZE=4000
       - CHUNK_OVERLAP=2000
-      - DESCRIPTION=Insira as perguntas
-      - PLACEHOLDER=Nova pergunta
-      - TITLE=Vision
+      - DESCRIPTION=Ask a Question!
+      - PLACEHOLDER=Quais as cameras mais rapidas disponíveis?...
+      - TITLE=GPT-Vision
     restart: always
     network_mode: host
