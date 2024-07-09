@@ -15,13 +15,18 @@ services:
       - "/etc/timezone:/etc/timezone:ro"
       - "/etc/localtime:/etc/localtime:ro"
       - "./documents:/home/strokmatic/documents"
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - capabilities: [gpu]
     environment:
       - CODES=
       - DOCUMENTS=./documents
       - WEBSITES=https://www.hikrobotics.com/en/machinevision/visionproduct?typeId=78&id=145;https://www.baslerweb.com/en/cameras/#produkte;https://www.baumer.com/br/pt/resumo-dos-produtos/cameras-industriais-processamento-de-imagem/cameras-industriais/serie-ax/c/43083/products;https://www.china-vision.org/cases-detail/216412.html
       - MODEL=llama3
-      - CHUNK_SIZE=4000
-      - CHUNK_OVERLAP=2000
+      - CHUNK_SIZE=2000
+      - CHUNK_OVERLAP=600
       - DESCRIPTION=Ask a Question!
       - PLACEHOLDER=Quais as cameras mais rapidas disponíveis?...
       - TITLE=GPT-Vision
