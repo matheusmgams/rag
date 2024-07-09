@@ -1,6 +1,9 @@
+chromadb
 beautifulsoup4
 gradio 
 pymupdf
 python-pptx
 ollama 
 langchain
+langchain-community
+langchain-core
