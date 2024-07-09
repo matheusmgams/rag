@@ -1,7 +1,7 @@
 version: "3.9"
 services:
   rag:
-    image: southamerica-east1-docker.pkg.dev/strokmatic/strokmatic/rag:latest
+    image: rag:latest
     build:
       dockerfile: rag.Dockerfile
     container_name: rag
@@ -16,14 +16,14 @@ services:
       - "/etc/localtime:/etc/localtime:ro"
       - "./documents:/home/strokmatic/documents"
     environment:
-      - CODES=''
-      - DOCUMENTS='./documents'
-      - WEBSITES='https://www.hikrobotics.com/en/machinevision/visionproduct?typeId=78&id=145'
-      - MODEL='llama3'
+      - CODES=
+      - DOCUMENTS=./documents
+      - WEBSITES=https://www.hikrobotics.com/en/machinevision/visionproduct?typeId=78&id=145
+      - MODEL=llama3
       - CHUNK_SIZE=4000
       - CHUNK_OVERLAP=2000
-      - DESCRIPTION='Insira as perguntas'
-      - PLACEHOLDER='Nova pergunta'
-      - TITLE='Vision'
+      - DESCRIPTION=Insira as perguntas
+      - PLACEHOLDER=Nova pergunta
+      - TITLE=Vision
     restart: always
     network_mode: host
