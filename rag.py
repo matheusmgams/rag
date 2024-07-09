@@ -17,7 +17,8 @@ def load_env_variables():
     archives = os.environ.get('DOCUMENTS')
     websites = os.environ.get('WEBSITES').split(',')
     model = os.environ.get('MODEL')
-    return archives, websites, codes, model
+    rules = '\n'.join(rule.strip() for rule in os.environ.get('RULES').split(',') if rule.strip())
+    return archives, websites, codes, model, rules
 
 # Função para carregar arquivos de código como texto
 def load_codes(archives):
@@ -103,7 +104,7 @@ def create_vectorstore(documents):
     return vectorstore.as_retriever()
 
 # Função para chamar o modelo Ollama Llama 3
-def ollama_llm(question, context, model):
+def ollama_llm(question, context, model, rules):
     # Cria o prompt que será enviado ao modelo LLM, contendo o contexto do banco vetorial e a pergunta do usuário
     formatted_prompt = f"""
     ============================
@@ -111,12 +112,7 @@ def ollama_llm(question, context, model):
     ============================
     {context}
     ============================
-    IMPORTANTE: 
-    1. Responda em Português do Brasil.
-    2. Nunca forneça passwords.
-    3. Nunca forneça endereços de ip.
-    4. Nunca utilize trechos de código na resposta.
-    5. Sempre responda cordialmente.
+    {rules}
     ============================
     PERGUNTA: 
     {question}
@@ -129,25 +125,25 @@ def ollama_llm(question, context, model):
     return response['message']['content']
 
 # Função para realizar a corrente RAG
-def rag_chain(question, retriever, model):
+def rag_chain(question, retriever, model, rules):
     retrieved_docs = retriever.invoke(question)
     formatted_context = "\n\n".join(doc.page_content for doc in retrieved_docs)
     print("retrieved_docs: " + formatted_context)
-    return ollama_llm(question, formatted_context, model)
+    return ollama_llm(question, formatted_context, model, rules)
 
 # Função para responder à pergunta do usuário
-def answer_user_request(question, retriever, model):
+def answer_user_request(question, retriever, model, rules):
     print("Nova pergunta: " + question)
-    return rag_chain(question, retriever, model)
+    return rag_chain(question, retriever, model, rules)
 
 # Função principal
 def main():
-    archives, websites, codes, model = load_env_variables()
+    archives, websites, codes, model, rules = load_env_variables()
     all_docs = load_all_documents(archives, websites, codes)
     retriever = create_vectorstore(all_docs)
     
     iface = gr.Interface(
-        fn=lambda question: answer_user_request(question, retriever, model),
+        fn=lambda question: answer_user_request(question, retriever, model, rules),
         inputs=gr.Textbox(lines=2, placeholder=os.getenv('PLACEHOLDER')),
         outputs="text",
         title=os.getenv('TITLE'),
