@@ -15,16 +15,16 @@ def load_env_variables():
     load_dotenv()
     codes = os.environ.get('CODES')
     archives = os.environ.get('DOCUMENTS')
-    websites = os.environ.get('WEBSITES').split(',')
+    websites = os.environ.get('WEBSITES').split(';')
     model = os.environ.get('MODEL')
-    rules = '\n'.join(rule.strip() for rule in os.environ.get('RULES').split(',') if rule.strip())
+    rules = '\n\n'.join(rule.strip() for rule in os.environ.get('RULES').split(';') if rule.strip())
     return archives, websites, codes, model, rules
 
 # Função para carregar arquivos de código como texto
-def load_codes(archives):
+def load_codes(archives, codes):
     all_code = []
     for root, dirs, files in os.walk(archives):
-        code_files = [os.path.join(root, file) for file in files if file.endswith('.cs')]
+        code_files = [os.path.join(root, file) for file in files if file.endswith(codes)]
         for code_file in code_files:
             try:
                 with open(code_file, 'r', encoding='utf-8') as f:
@@ -85,7 +85,7 @@ def load_websites(websites):
 # Função principal para carregar todos os documentos
 def load_all_documents(archives, websites, codes):
     all_docs = []
-    if codes is not None: all_docs.extend(load_codes(codes))
+    if archives is not None and codes is not None: all_docs.extend(load_codes(archives, codes))
     if archives is not None: all_docs.extend(load_pdfs(archives))
     if archives is not None: all_docs.extend(load_pptx(archives))
     if websites is not None: all_docs.extend(load_websites(websites))
@@ -108,13 +108,14 @@ def ollama_llm(question, context, model, rules):
     # Cria o prompt que será enviado ao modelo LLM, contendo o contexto do banco vetorial e a pergunta do usuário
     formatted_prompt = f"""
     ============================
-    CONTEXTO DO DOCUMENTO
+    DOCUMENT CONTEXT
     ============================
     {context}
     ============================
+    RULES:
     {rules}
     ============================
-    PERGUNTA: 
+    QUESTION: 
     {question}
     ============================
     """

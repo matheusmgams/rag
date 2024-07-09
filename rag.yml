@@ -18,13 +18,13 @@ services:
     environment:
       - CODES=
       - DOCUMENTS=./documents
-      - WEBSITES=https://www.hikrobotics.com/en/machinevision/visionproduct?typeId=78&id=145,https://www.baslerweb.com/en/cameras/#produkte,https://www.baumer.com/br/pt/resumo-dos-produtos/cameras-industriais-processamento-de-imagem/cameras-industriais/serie-ax/c/43083/products,https://www.china-vision.org/cases-detail/216412.html
+      - WEBSITES=https://www.hikrobotics.com/en/machinevision/visionproduct?typeId=78&id=145;https://www.baslerweb.com/en/cameras/#produkte;https://www.baumer.com/br/pt/resumo-dos-produtos/cameras-industriais-processamento-de-imagem/cameras-industriais/serie-ax/c/43083/products;https://www.china-vision.org/cases-detail/216412.html
       - MODEL=llama3
       - CHUNK_SIZE=4000
       - CHUNK_OVERLAP=2000
       - DESCRIPTION=Ask a Question!
       - PLACEHOLDER=Quais as cameras mais rapidas disponíveis?...
       - TITLE=GPT-Vision
-      - RULES=IMPORTANTE:,1. Responda em Português do Brasil.,2. Nunca forneça passwords.,3. Nunca forneça endereços de ip.,4. Nunca utilize trechos de código na resposta.,5. Sempre responda cordialmente.,6. Sempre forneça opções de cameras de diversos fabricantes.
+      - RULES=1. Responda em Português do Brasil.;2. Nunca forneça passwords.;3. Nunca forneça endereços de ip.;4. Nunca utilize trechos de código na resposta.;5. Sempre responda cordialmente.;6. Sempre forneça opções de cameras de diversos fabricantes.
     restart: always
     network_mode: host
