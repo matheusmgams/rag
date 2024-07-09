@@ -153,7 +153,7 @@ def main():
         title=os.getenv('TITLE'),
         description=os.getenv('DESCRIPTION'),
     )
-    iface.launch(debug=True)
+    iface.launch(debug=False)
 
 if __name__ == "__main__":
     main()
