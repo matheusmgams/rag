@@ -40,6 +40,9 @@ RUN curl -fsSL https://nvidia.github.io/libnvidia-container/gpgkey | gpg --dearm
     apt update && \
     apt install -y nvidia-container-toolkit
 
+# Configurar runtime da NVIDIA
+RUN nvidia-ctk runtime configure --runtime=docker
+
 # Copiar ambiente Python da etapa de construção
 COPY --from=builder /venv /venv
 
