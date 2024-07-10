@@ -18,33 +18,16 @@ RUN apt update && apt upgrade -y && apt install -y \
     curl \
     wget
 
-# Instalando dependências Python
-COPY rag.req rag.req
-RUN python3 -m venv /venv && \
-    /venv/bin/pip install --upgrade pip && \
-    /venv/bin/pip install --no-cache-dir -r rag.req
-
 # Etapa final
 FROM ollama/ollama:latest
 
-# Instalar dependências necessárias
+# Instalar dependências necessárias, incluindo Python
 RUN apt update && apt install -y \
     gnupg \
-    curl
-
-# Configurando repositório da Nvidia
-RUN curl -fsSL https://nvidia.github.io/libnvidia-container/gpgkey | gpg --dearmor -o /usr/share/keyrings/nvidia-container-toolkit-keyring.gpg && \
-    curl -s -L https://nvidia.github.io/libnvidia-container/stable/deb/nvidia-container-toolkit.list | \
-    sed 's#deb https://#deb [signed-by=/usr/share/keyrings/nvidia-container-toolkit-keyring.gpg] https://#g' | \
-    tee /etc/apt/sources.list.d/nvidia-container-toolkit.list && \
-    apt update && \
-    apt install -y nvidia-container-toolkit
-
-# Configurar runtime da NVIDIA
-RUN nvidia-ctk runtime configure --runtime=docker
-
-# Copiar ambiente Python da etapa de construção
-COPY --from=builder /venv /venv
+    curl \
+    python3 \
+    python3-venv \
+    python3-pip
 
 # Crie usuário e diretório de trabalho
 ARG USERNAME=strokmatic
@@ -62,6 +45,11 @@ COPY . .
 
 # Configurar ambiente virtual Python
 ENV PATH="/venv/bin:$PATH"
+
+# Instalando dependências Python
+RUN python3 -m venv /venv && \
+    /venv/bin/pip install --upgrade pip && \
+    /venv/bin/pip install --no-cache-dir -r rag.req
 
 # Permitir execução do script
 RUN chmod +x ./run.sh
