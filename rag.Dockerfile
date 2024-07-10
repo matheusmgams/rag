@@ -25,7 +25,7 @@ RUN python3 -m venv /venv && \
     /venv/bin/pip install --no-cache-dir -r rag.req
 
 # Etapa final
-FROM chromadb/chroma:latest
+FROM ollama/ollama:latest
 
 # Instalar dependências necessárias
 RUN apt update && apt install -y \
@@ -45,9 +45,6 @@ RUN nvidia-ctk runtime configure --runtime=docker
 
 # Copiar ambiente Python da etapa de construção
 COPY --from=builder /venv /venv
-
-# Instalar Ollama
-RUN curl -fsSL https://ollama.com/install.sh | bash
 
 # Crie usuário e diretório de trabalho
 ARG USERNAME=strokmatic
