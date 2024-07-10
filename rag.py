@@ -145,8 +145,8 @@ def main():
     
     iface = gr.Interface(
         fn=lambda question: answer_user_request(question, retriever, model, rules),
-        inputs=gr.Textbox(lines=2, placeholder=os.getenv('PLACEHOLDER'), interactive=True, submit_on_enter=True),
-        outputs="text",
+        inputs=gr.Textbox(lines=1, placeholder=os.getenv('PLACEHOLDER'), interactive=True),
+        outputs=gr.Textbox(lines=0, interactive=True),
         title=os.getenv('TITLE'),
         description=os.getenv('DESCRIPTION'),
     )
