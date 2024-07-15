@@ -5,11 +5,25 @@ from langchain_community.document_loaders import WebBaseLoader, PyMuPDFLoader
 
 class DocumentLoader:
     def __init__(self, archives, codes, websites):
+        # Define defaults para lidar com ausência de variáveis
+        if not archives:
+            print("O diretório de arquivos (archives) não foi definido. Documentos não serão carregados.")
+            archives = None
+        if not codes:
+            print("A extensão dos arquivos de código (codes) não foi definida. Arquivos de código não serão carregados.")
+            codes = None
+        if not websites:
+            print("A lista de websites (websites) não foi definida. Websites não serão carregados.")
+            websites = []
+        
         self.archives = archives
         self.codes = codes
         self.websites = websites
 
     def load_codes(self):
+        if not self.archives or not self.codes:
+            return []
+
         all_code = []
         for root, dirs, files in os.walk(self.archives):
             code_files = [os.path.join(root, file) for file in files if file.endswith(self.codes)]
@@ -24,6 +38,12 @@ class DocumentLoader:
         return all_code
 
     def load_pdfs(self):
+        if not self.archives:
+            return []
+
+        if not os.path.isdir(self.archives):
+            raise FileNotFoundError(f"O diretório de arquivos '{self.archives}' não foi encontrado.")
+        
         pdf_files = [os.path.join(self.archives, code_file) for code_file in os.listdir(self.archives) if code_file.endswith('.pdf')]
         all_docs = []
         for pdf_file in pdf_files:
@@ -39,6 +59,12 @@ class DocumentLoader:
         return all_docs
 
     def load_pptx(self):
+        if not self.archives:
+            return []
+
+        if not os.path.isdir(self.archives):
+            raise FileNotFoundError(f"O diretório de arquivos '{self.archives}' não foi encontrado.")
+        
         pptx_files = [os.path.join(self.archives, code_file) for code_file in os.listdir(self.archives) if code_file.endswith('.pptx')]
         all_docs = []
         for pptx_file in pptx_files:
@@ -56,6 +82,9 @@ class DocumentLoader:
         return all_docs
 
     def load_websites(self):
+        if not self.websites:
+            return []
+
         all_docs = []
         for website in self.websites:
             try:

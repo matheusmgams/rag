@@ -8,7 +8,7 @@ def main():
     document_loader = DocumentLoader(archives, codes, websites)
     all_docs = document_loader.load_all_documents()
     retriever = VectorStoreCreator.create_vectorstore(all_docs)
-    gradio_interface = GradioInterface(retriever, model, rules)
+    GradioInterface(retriever, model, rules).launch()
 
 if __name__ == "__main__":
     main()

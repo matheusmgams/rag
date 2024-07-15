@@ -11,4 +11,4 @@ ollama pull llama3
 ollama pull nomic-embed-text
 
 # Run applications
-python3 ./rag.py
+python3 ./main.py
