@@ -45,18 +45,18 @@ class DocumentLoader:
             raise FileNotFoundError(f"O diretório de arquivos '{self.archives}' não foi encontrado.")
         
         pdf_files = [os.path.join(self.archives, code_file) for code_file in os.listdir(self.archives) if code_file.endswith('.pdf')]
-        all_docs = []
+        all_pdfs = []
         for pdf_file in pdf_files:
             try:
                 loader = PyMuPDFLoader(pdf_file)
                 docs = loader.load()
                 for doc in docs:
                     doc.metadata["title"] = pdf_file
-                all_docs.extend(docs)
+                all_pdfs.extend(docs)
                 print(f"Load {pdf_file}")
             except Exception as e:
                 print(f"Erro ao carregar {pdf_file}: {e}")
-        return all_docs
+        return all_pdfs
 
     def load_pptx(self):
         if not self.archives:
@@ -66,7 +66,7 @@ class DocumentLoader:
             raise FileNotFoundError(f"O diretório de arquivos '{self.archives}' não foi encontrado.")
         
         pptx_files = [os.path.join(self.archives, code_file) for code_file in os.listdir(self.archives) if code_file.endswith('.pptx')]
-        all_docs = []
+        all_pptx = []
         for pptx_file in pptx_files:
             try:
                 doc_content = ""
@@ -75,26 +75,26 @@ class DocumentLoader:
                     for shape in slide.shapes:
                         if hasattr(shape, "text"):
                             doc_content += shape.text + "\n"
-                all_docs.append(Document(page_content=doc_content, metadata={"title": pptx_file}))
+                all_pptx.append(Document(page_content=doc_content, metadata={"title": pptx_file}))
                 print(f"Load {pptx_file}")
             except Exception as e:
                 print(f"Erro ao carregar {pptx_file}: {e}")
-        return all_docs
+        return all_pptx
 
     def load_websites(self):
         if not self.websites:
             return []
 
-        all_docs = []
+        all_sites = []
         for website in self.websites:
             try:
                 loader = WebBaseLoader(website)
                 docs = loader.load()
-                all_docs.extend(docs)
+                all_sites.extend(docs)
                 print(f"Load {website}")
             except Exception as e:
                 print(f"Erro ao carregar {website}: {e}")
-        return all_docs
+        return all_sites
 
     def load_all_documents(self):
         all_docs = []
