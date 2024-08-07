@@ -1,17 +1,47 @@
-#### LLAMA3 com RAG
+### Introdução ao LLAMA3 com RAG
 
-#### comando 1: baixar e instalar o llama, mais informações sobre o modelo podem ser encontradas em: https://ollama.com/library/llama3
-#### curl -fsSL https://ollama.com/install.sh | sh
+Se você é novo no conceito de RAG (Retrieval-Augmented Generation) e no uso do LLAMA3, esta documentação irá guiá-lo pelos passos necessários para configurar o ambiente e executar o modelo.
 
-#### comando 2: rodar o servidor
-#### ollama serve
+#### Passo 1: Instalação do LLAMA3
 
-#### digite esses comandos, individualmente, dentro do segundo console que está rodando
+O LLAMA3 é um modelo de linguagem avançado desenvolvido pela Ollama. Antes de começar, você precisa instalar o LLAMA3. 
 
-#### comando 1: instalar o modelo llama3
-#### ollama pull llama3
+##### 1.1. Baixar e Instalar o LLAMA3
 
-#### comando 2: instalar o modelo nomic-embed-text para embeddings
-#### ollama pull nomic-embed-text
+Para instalar o LLAMA3, você precisa executar um comando que baixa e instala o software necessário. Abra o terminal (ou prompt de comando) e execute o seguinte comando:
+```bash
+curl -fsSL https://ollama.com/install.sh | sh
+```
+Este comando baixa um script de instalação do LLAMA3 e o executa. Mais informações sobre o LLAMA3 podem ser encontradas em https://ollama.com/library/llama3.
 
-#### documentação docker: https://hub.docker.com/r/ollama/ollama
+#### Passo 2: Iniciar o Servidor do LLAMA3
+
+Após a instalação, você precisa iniciar o servidor LLAMA3. Abra o terminal novamente e execute:
+```bash
+ollama serve
+```
+Isso iniciará o servidor que você usará para interagir com o modelo LLAMA3.
+
+#### Passo 3: Configuração do Segundo Console
+
+Para usar o modelo, você precisará executar alguns comandos adicionais em um segundo terminal. Siga os passos abaixo:
+
+##### 3.1. Instalar o Modelo LLAMA3
+
+No segundo terminal, execute o seguinte comando para baixar e instalar o modelo LLAMA3:
+```bash
+ollama pull llama3
+```
+Este comando baixa o modelo LLAMA3 necessário para realizar inferências.
+
+##### 3.2. Instalar o Modelo de Embeddings Nomic
+
+Para gerar embeddings, você precisa instalar o modelo `nomic-embed-text`. Execute o comando a seguir no segundo terminal:
+```bash
+ollama pull nomic-embed-text
+```
+Este comando baixa e instala o modelo de embeddings necessário para o processo de RAG.
+
+Recursos Adicionais
+
+Para mais informações sobre como usar o Docker com o LLAMA3, consulte a documentação oficial do Docker: https://hub.docker.com/r/ollama/ollama.
