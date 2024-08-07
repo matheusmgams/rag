@@ -2,21 +2,21 @@
 
 Se você é novo no conceito de RAG (Retrieval-Augmented Generation) e no uso do LLAMA3, esta documentação irá guiá-lo pelos passos necessários para configurar o ambiente e executar o modelo.
 
-#### Passo 1: Instalação do LLAMA3
+#### Passo 1: Instalação do OLLAMA
 
-O LLAMA3 é um modelo de linguagem avançado desenvolvido pela Ollama. Antes de começar, você precisa instalar o LLAMA3. 
+O OLLAMA é um modelo de linguagem avançado desenvolvido pela Ollama. Antes de começar, você precisa instalar o OLLAMA. 
 
-##### 1.1. Baixar e Instalar o LLAMA3
+##### 1.1. Baixar e Instalar o OLLAMA
 
 Para instalar o LLAMA3, você precisa executar um comando que baixa e instala o software necessário. Abra o terminal (ou prompt de comando) e execute o seguinte comando:
 ```bash
 curl -fsSL https://ollama.com/install.sh | sh
 ```
-Este comando baixa um script de instalação do LLAMA3 e o executa. Mais informações sobre o LLAMA3 podem ser encontradas em https://ollama.com/library/llama3.
+Este comando baixa um script de instalação do OLLAMA e o executa. Mais informações sobre o OLLAMA podem ser encontradas em https://ollama.com/library/llama3.
 
-#### Passo 2: Iniciar o Servidor do LLAMA3
+#### Passo 2: Iniciar o Servidor do OLLAMA
 
-Após a instalação, você precisa iniciar o servidor LLAMA3. Abra o terminal novamente e execute:
+Após a instalação, você precisa iniciar o servidor OLLAMA. Abra o terminal novamente e execute:
 ```bash
 ollama serve
 ```
