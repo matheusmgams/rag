@@ -4,7 +4,7 @@ Se você é novo no conceito de RAG (Retrieval-Augmented Generation) e no uso do
 
 #### Passo 1: Instalação do OLLAMA
 
-O OLLAMA é um modelo de linguagem avançado desenvolvido pela Ollama. Antes de começar, você precisa instalar o OLLAMA. 
+O OLLAMA é um servidor avançado para gerenciamento de llms e outros modelos. Antes de começar, você precisa instalar o OLLAMA. 
 
 ##### 1.1. Baixar e Instalar o OLLAMA
 
