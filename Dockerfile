@@ -1,33 +1,13 @@
-# Etapa de construção
-FROM python:3.11-slim-bullseye as builder
+FROM python:3.11-slim
 
-# Definindo a variável de ambiente para o fuso horário de São Paulo e a versão do Python
-ENV TZ=America/Sao_Paulo \
-    PYTHON_VERSION=3.11.0
+# Instala dependências necessárias
+RUN apt-get update && \
+    apt-get install -y sqlite3 libsqlite3-dev && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
 
-# Instale dependências necessárias para construção
-RUN apt update && apt upgrade -y && apt install -y \
-    build-essential \
-    libjpeg62-turbo-dev \
-    libpng-dev \
-    libtiff-dev \
-    libwebp-dev \
-    zlib1g-dev \
-    libffi-dev \
-    bash \
-    curl \
-    wget
-
-# Etapa final
-FROM ollama/ollama:latest
-
-# Instalar dependências necessárias, incluindo Python
-RUN apt update && apt install -y \
-    gnupg \
-    curl \
-    python3 \
-    python3-venv \
-    python3-pip
+# Verifica a versão do SQLite
+RUN sqlite3 --version
 
 # Crie usuário e diretório de trabalho
 ARG USERNAME=strokmatic
@@ -49,13 +29,10 @@ ENV PATH="/venv/bin:$PATH"
 # Instalando dependências Python
 RUN python3 -m venv /venv && \
     /venv/bin/pip install --upgrade pip && \
-    /venv/bin/pip install --no-cache-dir -r rag.req
-
-# Permitir execução do script
-RUN chmod +x ./run.sh
+    /venv/bin/pip install --no-cache-dir -r requirements.txt
 
 # Expor a porta que a aplicação irá usar
 EXPOSE 7860
 
 # Comando de entrada para iniciar o Ollama e o script Python
-ENTRYPOINT ["./run.sh"]
+ENTRYPOINT ["python3 ./main.py"]

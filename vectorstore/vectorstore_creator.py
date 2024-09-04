@@ -1,4 +1,5 @@
 import os
+from tqdm import tqdm
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain.docstore.document import Document
 from langchain_community.vectorstores import Chroma
@@ -26,7 +27,7 @@ class VectorStoreCreator:
         text_splitter = RecursiveCharacterTextSplitter(chunk_size=chunk_size, chunk_overlap=chunk_overlap)
         splits = []
 
-        for doc in documents:
+        for doc in tqdm(documents, desc="Processing Documents"):
             for chunk in text_splitter.split_text(doc.page_content):
                 splits.append(Document(page_content=chunk, metadata=doc.metadata))
 
@@ -35,5 +36,6 @@ class VectorStoreCreator:
             print("Após a divisão de texto, a lista de chunks está vazia. Verifique o tamanho do chunk e a sobreposição.")
 
         embeddings = OllamaEmbeddings(model="nomic-embed-text")
+        embeddings.base_url = os.getenv("OLLAMA_HOST_BASE", "0.0.0.0")
         vectorstore = Chroma.from_documents(documents=splits, embedding=embeddings)
         return vectorstore.as_retriever()

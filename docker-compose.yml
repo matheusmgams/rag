@@ -3,7 +3,7 @@ services:
   rag:
     image: rag:latest
     build:
-      dockerfile: rag.Dockerfile
+      dockerfile: Dockerfile
     container_name: rag
     privileged: true
     runtime: nvidia
@@ -23,6 +23,7 @@ services:
             - driver: nvidia
               count: all
               capabilities: [compute, utility]
+    entrypoint: "python3 /home/strokmatic/main.py"
     environment:
       - CODES=
       - DOCUMENTS=./documents

@@ -1,4 +1,5 @@
 import os
+from tqdm import tqdm
 from pptx import Presentation
 from langchain.docstore.document import Document
 from langchain_community.document_loaders import WebBaseLoader, PyMuPDFLoader
@@ -25,14 +26,14 @@ class DocumentLoader:
             return []
 
         all_code = []
-        for root, dirs, files in os.walk(self.archives):
+        for root, dirs, files in tqdm(os.walk(self.archives), desc="Searching Documents"):
             code_files = [os.path.join(root, file) for file in files if file.endswith(self.codes)]
-            for code_file in code_files:
+            for code_file in tqdm(code_files, desc="Loading Documents"):
                 try:
                     with open(code_file, 'r', encoding='utf-8') as f:
                         code = f.read()
                         all_code.append(Document(page_content=code, metadata={"title": code_file}))
-                        print(f"Load {code_file}")
+                        # print(f"Load {code_file}")
                 except Exception as e:
                     print(f"Erro ao carregar {code_file}: {e}")
         return all_code
@@ -46,14 +47,14 @@ class DocumentLoader:
         
         pdf_files = [os.path.join(self.archives, code_file) for code_file in os.listdir(self.archives) if code_file.endswith('.pdf')]
         all_pdfs = []
-        for pdf_file in pdf_files:
+        for pdf_file in tqdm(pdf_files, desc="Loading Documents"):
             try:
                 loader = PyMuPDFLoader(pdf_file)
                 docs = loader.load()
                 for doc in docs:
                     doc.metadata["title"] = pdf_file
                 all_pdfs.extend(docs)
-                print(f"Load {pdf_file}")
+                # print(f"Load {pdf_file}")
             except Exception as e:
                 print(f"Erro ao carregar {pdf_file}: {e}")
         return all_pdfs
@@ -67,7 +68,7 @@ class DocumentLoader:
         
         pptx_files = [os.path.join(self.archives, code_file) for code_file in os.listdir(self.archives) if code_file.endswith('.pptx')]
         all_pptx = []
-        for pptx_file in pptx_files:
+        for pptx_file in tqdm(pptx_files, desc="Loading Documents"):
             try:
                 doc_content = ""
                 prs = Presentation(pptx_file)
@@ -76,7 +77,7 @@ class DocumentLoader:
                         if hasattr(shape, "text"):
                             doc_content += shape.text + "\n"
                 all_pptx.append(Document(page_content=doc_content, metadata={"title": pptx_file}))
-                print(f"Load {pptx_file}")
+                # print(f"Load {pptx_file}")
             except Exception as e:
                 print(f"Erro ao carregar {pptx_file}: {e}")
         return all_pptx
@@ -86,12 +87,12 @@ class DocumentLoader:
             return []
 
         all_sites = []
-        for website in self.websites:
+        for website in tqdm(self.websites, desc="Loading Sites"):
             try:
                 loader = WebBaseLoader(website)
                 docs = loader.load()
                 all_sites.extend(docs)
-                print(f"Load {website}")
+                # print(f"Load {website}")
             except Exception as e:
                 print(f"Erro ao carregar {website}: {e}")
         return all_sites
